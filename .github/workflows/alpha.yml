@@ -1,0 +1,65 @@
+name: Alpha
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - alpha
+  schedule:
+    - cron: '0 0 * * *'
+env:
+  DEBIAN_FRONTEND: noninteractive
+  TEMPORARY_DIRECTORY: /home/runner/work/_temp
+jobs:
+  preparation:
+    name: Preparation
+    runs-on: ubuntu-latest
+    steps:
+      - name: Create environment
+        run: |
+          echo "export DOCKER_TAG=\"alpha-${GITHUB_SHA}-$(date +'%Y%m%d-%H%M%S')\"" >> ./vars
+      - name: Persist environment
+        uses: actions/upload-artifact@v1
+        with:
+          name: environment
+          path: ./vars
+  build:
+    name: Build multiarch images
+    runs-on: ubuntu-latest
+    needs: [preparation]
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v1
+        with:
+          ref: alpha
+      - name: Fetch environment
+        uses: actions/download-artifact@v1
+        with:
+          name: environment
+      - name: Authenticate registry
+        uses: azure/docker-login@v1
+        with:
+          username: ${{ secrets.DOCKER_HUB_USER }}
+          password: ${{ secrets.DOCKER_HUB_TOKEN }}
+      - name: Configure system
+        run: |
+          # update packages & install requirements
+            sudo apt-get -qy update
+            sudo apt-get -qy install moreutils
+
+          # enable Dockers experimental features
+            if [[ -z "${DOCKER_CONFIG}" ]]; then
+              export DOCKER_CONFIG="${TEMPORARY_DIRECTORY}/docker.$(date +%s)"
+              mkdir -p ${DOCKER_CONFIG}
+              touch ${DOCKER_CONFIG}/config.json
+            fi
+
+            sudo sh -c "jq -s 'add' ${DOCKER_CONFIG}/config.json ./.docker/config.json | sponge ${DOCKER_CONFIG}/config.json"
+            sudo sh -c "jq . ./.docker/daemon.json | sponge /etc/docker/daemon.json"
+            sudo service docker restart
+      - name: Build image
+        run: |
+          source ./environment/vars
+          
+          docker buildx create --name easyepg --driver docker-container --bootstrap
+          docker buildx use easyepg
+          docker buildx build --platform linux/amd64,linux/arm64/v8,linux/arm/v7 --compress --no-cache --force-rm --squash --push -t qoopido/easyepg.minimal:${DOCKER_TAG} -t qoopido/easyepg.minimal:alpha .
