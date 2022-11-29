@@ -26,13 +26,12 @@ FROM base as builder
 
 ARG WORKDIR=/var/app
 WORKDIR ${WORKDIR}
-ADD https://github.com/telerising/zattoo_api/archive/extra.tar.gz ${WORKDIR}/
+COPY telerising ${WORKDIR}/
 COPY root /
 
 RUN \
-    ### prepare build \
-    tar -xf extra.tar.gz --strip 1 \
-    && find . ! -name "telerising.py" -type f -maxdepth 1 -exec rm -f {} + \
+    ### prepare build
+    find . ! -name "telerising.py" -type f -maxdepth 1 -exec rm -f {} + \
     && pipreqs ./ \
     && python3 -m pip install --no-cache --upgrade -r requirements.txt \
     ### run nuitka
@@ -44,6 +43,7 @@ RUN \
         --follow-stdlib \
         --nofollow-import-to=pytest \
         --python-flag=nosite,-OO \
+        #--python-flag=-OO \
         --plugin-enable=anti-bloat,implicit-imports,data-files,pylint-warnings \
         --warn-implicit-exceptions \
         --warn-unusual-code \
