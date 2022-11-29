@@ -26,16 +26,13 @@ FROM base as builder
 
 ARG WORKDIR=/var/app
 WORKDIR ${WORKDIR}
-ADD https://github.com/telerising/zattoo_api/tarball/extra ${WORKDIR}/
+ADD https://github.com/telerising/zattoo_api/archive/extra.tar.gz ${WORKDIR}/
 COPY root /
 
 RUN \
-    ### prepare build
-    tar -xf extra --strip 1 \
+    ### prepare build \
+    tar -xf extra.tar.gz --strip 1 \
     && find . ! -name "telerising.py" -type f -maxdepth 1 -exec rm -f {} + \
-    && echo "###" \
-    && ls -la ./ \
-    && echo "###" \
     && pipreqs ./ \
     && python3 -m pip install --no-cache --upgrade -r requirements.txt \
     ### run nuitka
@@ -59,9 +56,9 @@ RUN \
     && strip --strip-unneeded --strip-debug telerising \
     && upx --best --overlay=strip telerising
 
-FROM scratch
+FROM busybox:stable-glibc
 
-COPY --from=builder /storage /storage
+COPY --from=builder /settings.json /settings.json
 COPY --from=builder /var/app/telerising.dist/ /
 
 ENTRYPOINT [ "/telerising" ]
