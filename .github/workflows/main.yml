@@ -19,7 +19,7 @@ jobs:
         with:
           ref: main
           submodules: true
-          token: ${{ secrets.ACCESS_TOKEN }}
+          ssh-key: ${{ secrets.PRIVATE_KEY }}
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v2
       - name: Set up Docker Buildx
