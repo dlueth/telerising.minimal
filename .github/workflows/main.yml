@@ -18,7 +18,12 @@ jobs:
         uses: actions/checkout@v3
         with:
           ref: main
-          submodules: true
+      - name: Checkout Telerising
+        uses: actions/checkout@v3
+        with:
+          repository: telerising/zattoo_api
+          ref: extra
+          path: telerising
           ssh-key: ${{ secrets.PRIVATE_KEY }}
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v2
@@ -31,6 +36,6 @@ jobs:
           password: ${{ secrets.DOCKER_HUB_TOKEN }}
       - name: Build image
         run: |
-          DOCKER_TAG="main-${GITHUB_SHA}-$(date +'%Y%m%d-%H%M%S')"
+          DOCKER_TAG="${GITHUB_SHA}-$(date +'%Y%m%d-%H%M%S')"
           
           docker buildx build --platform linux/amd64,linux/arm64,linux/arm/v7 --compress --no-cache --force-rm --push -t qoopido/telerising.minimal:${DOCKER_TAG} -t qoopido/telerising.minimal:latest .
