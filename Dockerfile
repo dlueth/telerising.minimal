@@ -1,6 +1,6 @@
 FROM python:3.10-slim-bullseye as base
 
-ARG APT_DEPENDENCIES="build-essential ccache libfuse-dev patchelf upx clang"
+ARG APT_DEPENDENCIES="build-essential ccache libfuse-dev patchelf upx"
 ARG PIP_DEPENDENCIES="nuitka ordered-set pipreqs"
 ENV DEBIAN_FRONTEND="noninteractive" \
     TERM=xterm
@@ -45,7 +45,6 @@ RUN python3 -OO -m nuitka \
         --warn-implicit-exceptions \
         --warn-unusual-code \
         --prefer-source-code \
-        --clang \
         ./telerising.py
 
 RUN cd telerising.dist/ \
