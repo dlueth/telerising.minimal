@@ -1,0 +1,3 @@
+[submodule "telerising"]
+	path = telerising
+	url = git@github.com:telerising/zattoo_api.git

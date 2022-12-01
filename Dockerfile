@@ -1,6 +1,6 @@
 FROM python:3.10-slim-bullseye as base
 
-ARG APT_DEPENDENCIES="build-essential ccache libfuse-dev patchelf upx"
+ARG APT_DEPENDENCIES="build-essential ccache libfuse-dev patchelf upx clang"
 ARG PIP_DEPENDENCIES="nuitka ordered-set pipreqs"
 ENV DEBIAN_FRONTEND="noninteractive" \
     TERM=xterm
@@ -29,36 +29,38 @@ WORKDIR ${WORKDIR}
 COPY telerising ${WORKDIR}/
 COPY root /
 
-RUN \
-    ### prepare build
-    find . ! -name "telerising.py" -type f -maxdepth 1 -exec rm -f {} + \
+RUN mv run.py telerising.py \
     && pipreqs ./ \
-    && python3 -m pip install --no-cache --upgrade -r requirements.txt \
-    ### run nuitka
-    && python3 -OO -m nuitka \
+    && python3 -m pip install --no-cache --upgrade -r requirements.txt
+
+RUN python3 -OO -m nuitka \
         --standalone \
         --include-data-dir=./app/static=app/static \
         --include-data-dir=./app/templates=app/templates \
         --follow-imports \
         --follow-stdlib \
         --nofollow-import-to=pytest \
-        --python-flag=nosite,-OO \
-        #--python-flag=-OO \
+        --python-flag=-S,-OO \
         --plugin-enable=anti-bloat,implicit-imports,data-files,pylint-warnings \
         --warn-implicit-exceptions \
         --warn-unusual-code \
         --prefer-source-code \
-        ./telerising.py \
-    ### add dynamic modules
-    && cd telerising.dist/ \
-    && /processLibs.sh \
-    ### run strip and upx
+        --clang \
+        ./telerising.py
+
+RUN cd telerising.dist/ \
+    && /usr/local/sbin/processLibs
+
+RUN cd telerising.dist/ \
     && strip --strip-unneeded --strip-debug telerising \
     && upx --best --overlay=strip telerising
 
+RUN cd /var/dist \
+    && cp -r /var/app/telerising.dist/* ./
+
+
 FROM busybox:stable-glibc
 
-COPY --from=builder /settings.json /settings.json
-COPY --from=builder /var/app/telerising.dist/ /
+COPY --from=builder /var/dist/ /
 
 ENTRYPOINT [ "/telerising" ]
