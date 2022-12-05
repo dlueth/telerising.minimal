@@ -21,7 +21,7 @@ docker run \
   -v /etc/localtime:/etc/localtime:ro \
   -v {SETTINGS.JSON}:/settings.json \
   --user=${UID}:${GID} \
-  --name=easyepg \
+  --name=telerising \
   --restart=unless-stopped \
   --network=bridge \
   qoopido/telerising.minimal:latest
