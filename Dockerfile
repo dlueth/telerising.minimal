@@ -60,8 +60,6 @@ RUN cd /var/dist \
 
 FROM busybox:stable-glibc
 
-ENV FLASK_DEBUG=0
-
 COPY --from=builder /var/dist/ /
 
 ENTRYPOINT [ "/telerising" ]
