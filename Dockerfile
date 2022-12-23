@@ -1,8 +1,8 @@
 FROM python:3.10-slim-bullseye as base
 
-ARG APT_DEPENDENCIES="build-essential ccache libfuse-dev patchelf upx"
-ARG PIP_DEPENDENCIES="nuitka ordered-set pipreqs"
-ENV DEBIAN_FRONTEND="noninteractive" \
+ENV APT_DEPENDENCIES="build-essential ccache libfuse-dev patchelf upx scons" \
+    PIP_DEPENDENCIES="nuitka ordered-set pipreqs" \
+    DEBIAN_FRONTEND="noninteractive" \
     TERM=xterm
 
 RUN \
@@ -24,7 +24,9 @@ RUN \
 
 FROM base as builder
 
-ARG WORKDIR=/var/app
+ARG TARGETARCH
+ARG TAR="false"
+ENV WORKDIR=/var/app
 WORKDIR ${WORKDIR}
 COPY telerising ${WORKDIR}/
 COPY root /
@@ -34,18 +36,16 @@ RUN mv run.py telerising.py \
     && python3 -m pip install --no-cache --upgrade -r requirements.txt
 
 RUN python3 -OO -m nuitka \
-        --standalone \
-        --include-data-dir=./app/static=app/static \
-        --include-data-dir=./app/templates=app/templates \
-        --follow-imports \
-        --follow-stdlib \
-        --nofollow-import-to=pytest \
-        --python-flag=-S,-OO \
-        --plugin-enable=anti-bloat,implicit-imports,data-files,pylint-warnings \
-        --warn-implicit-exceptions \
-        --warn-unusual-code \
-        --prefer-source-code \
-        ./telerising.py
+    --standalone \
+    --follow-stdlib \
+    --prefer-source-code \
+    --python-flag=-S,-OO \
+    --plugin-enable=anti-bloat,implicit-imports,data-files,pylint-warnings \
+    --include-data-dir=./app/static=app/static \
+    --include-data-dir=./app/templates=app/templates \
+    --warn-implicit-exceptions \
+    --warn-unusual-code \
+    ./telerising.py
 
 RUN cd telerising.dist/ \
     && /usr/local/sbin/processLibs
@@ -55,10 +55,13 @@ RUN cd telerising.dist/ \
     && upx --best --overlay=strip telerising
 
 RUN cd /var/dist \
-    && cp -r /var/app/telerising.dist/* ./
+    && cp -r ${WORKDIR}/telerising.dist/* ./
+
+RUN cd /var/dist \
+    && /usr/local/sbin/processBin
 
 
-FROM busybox:stable-glibc
+FROM scratch
 
 COPY --from=builder /var/dist/ /
 
