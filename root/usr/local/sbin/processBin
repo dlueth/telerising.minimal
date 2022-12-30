@@ -1,5 +1,0 @@
-#!/bin/sh
-
-if [ "$TAR" = "true" ] ; then
-  tar -czvf ./telerising.${TARGETARCH}.tar.gz -C ${WORKDIR}/telerising.dist ./ ;
-fi

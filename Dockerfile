@@ -25,7 +25,6 @@ RUN \
 FROM base as builder
 
 ARG TARGETARCH
-ARG TAR="false"
 ENV WORKDIR=/var/app
 WORKDIR ${WORKDIR}
 COPY telerising ${WORKDIR}/
@@ -57,12 +56,14 @@ RUN cd telerising.dist/ \
 RUN cd /var/dist \
     && cp -r ${WORKDIR}/telerising.dist/* ./
 
-RUN cd /var/dist \
-    && /usr/local/sbin/processBin
-
 
 FROM scratch
 
+COPY --from=tarampampam/curl:latest /bin/curl /bin/curl
 COPY --from=builder /var/dist/ /
+
+HEALTHCHECK --interval=30s --timeout=6s --retries=5 --start-period=30s CMD [ \
+    "/bin/curl", "--fail", "http://127.0.0.1:5000/" \
+]
 
 ENTRYPOINT [ "/telerising" ]
