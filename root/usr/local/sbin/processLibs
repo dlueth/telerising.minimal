@@ -2,33 +2,33 @@
 
 if [ "${TARGETARCH}" = "amd64" ]
 then
-  ldd telerising | grep "=> /" | awk '{print $3}' | xargs -I '{}' cp --no-clobber -v '{}' .
-  ldd telerising | grep "/lib64/ld-linux-x86-64" | awk '{print $1}' | xargs -I '{}' cp --parents -v '{}' .
-  cp --no-clobber -v /lib/x86_64-linux-gnu/libgcc_s.so.1 .
-  mkdir -p ./lib/x86_64-linux-gnu
-  cp --no-clobber -v /lib/x86_64-linux-gnu/libresolv* ./lib/x86_64-linux-gnu
-  cp --no-clobber -v /lib/x86_64-linux-gnu/libnss_files* ./lib/x86_64-linux-gnu
-  cp --no-clobber -v /lib/x86_64-linux-gnu/libnss_dns* ./lib/x86_64-linux-gnu
+  ldd telerising | grep "=> /" | awk '{print $3}' | xargs -I '{}' cp --no-clobber -v '{}' /var/dist
+  ldd telerising | grep "/lib64/ld-linux-x86-64" | awk '{print $1}' | xargs -I '{}' cp --parents -v '{}' /var/dist
+  cp --no-clobber -v /lib/x86_64-linux-gnu/libgcc_s.so.1 /var/dist
+  mkdir -p /var/dist/lib/x86_64-linux-gnu
+  cp --no-clobber -v /lib/x86_64-linux-gnu/libresolv* /var/dist/lib/x86_64-linux-gnu
+  cp --no-clobber -v /lib/x86_64-linux-gnu/libnss_files* /var/dist/lib/x86_64-linux-gnu
+  cp --no-clobber -v /lib/x86_64-linux-gnu/libnss_dns* /var/dist/lib/x86_64-linux-gnu
 fi
 
 if [ "${TARGETARCH}" = "arm64" ]
 then
-  ldd telerising | grep "=> /" | awk '{print $3}' | xargs -I '{}' cp --no-clobber -v '{}' .
-  ldd telerising | grep "/lib/ld-linux-aarch64" | awk '{print $1}' | xargs -I '{}' cp --parents -v '{}' .
-  cp --no-clobber -v /lib/aarch64-linux-gnu/libgcc_s.so.1 .
-  mkdir -p ./lib/aarch64-linux-gnu
-  cp --no-clobber -v /lib/aarch64-linux-gnu/libresolv* ./lib/aarch64-linux-gnu
-  cp --no-clobber -v /lib/aarch64-linux-gnu/libnss_files* ./lib/aarch64-linux-gnu
-  cp --no-clobber -v /lib/aarch64-linux-gnu/libnss_dns* ./lib/aarch64-linux-gnu
+  ldd telerising | grep "=> /" | awk '{print $3}' | xargs -I '{}' cp --no-clobber -v '{}' /var/dist
+  ldd telerising | grep "/lib/ld-linux-aarch64" | awk '{print $1}' | xargs -I '{}' cp --parents -v '{}' /var/dist
+  cp --no-clobber -v /lib/aarch64-linux-gnu/libgcc_s.so.1 /var/dist
+  mkdir -p /var/dist/lib/aarch64-linux-gnu
+  cp --no-clobber -v /lib/aarch64-linux-gnu/libresolv* /var/dist/lib/aarch64-linux-gnu
+  cp --no-clobber -v /lib/aarch64-linux-gnu/libnss_files* /var/dist/lib/aarch64-linux-gnu
+  cp --no-clobber -v /lib/aarch64-linux-gnu/libnss_dns* /var/dist/lib/aarch64-linux-gnu
 fi
 
 if [ "${TARGETARCH}" = "arm" ]
 then
-  ldd telerising | grep "=> /" | awk '{print $3}' | xargs -I '{}' cp --no-clobber -v '{}' .
-  ldd telerising | grep "/lib/ld-linux-armhf" | awk '{print $1}' | xargs -I '{}' cp --parents -v '{}' .
-  cp --no-clobber -v /lib/arm-linux-gnueabihf/libgcc_s.so.1 .
-  mkdir -p ./lib/arm-linux-gnueabihf
-  cp --no-clobber -v /lib/arm-linux-gnueabihf/libresolv* ./lib/arm-linux-gnueabihf
-  cp --no-clobber -v /lib/arm-linux-gnueabihf/libnss_files* ./lib/arm-linux-gnueabihf
-  cp --no-clobber -v /lib/arm-linux-gnueabihf/libnss_dns* ./lib/arm-linux-gnueabihf
+  ldd telerising | grep "=> /" | awk '{print $3}' | xargs -I '{}' cp --no-clobber -v '{}' /var/dist
+  ldd telerising | grep "/lib/ld-linux-armhf" | awk '{print $1}' | xargs -I '{}' cp --parents -v '{}' /var/dist
+  cp --no-clobber -v /lib/arm-linux-gnueabihf/libgcc_s.so.1 /var/dist
+  mkdir -p /var/dist/lib/arm-linux-gnueabihf
+  cp --no-clobber -v /lib/arm-linux-gnueabihf/libresolv* /var/dist/lib/arm-linux-gnueabihf
+  cp --no-clobber -v /lib/arm-linux-gnueabihf/libnss_files* /var/dist/lib/arm-linux-gnueabihf
+  cp --no-clobber -v /lib/arm-linux-gnueabihf/libnss_dns* /var/dist/lib/arm-linux-gnueabihf
 fi
