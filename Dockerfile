@@ -47,6 +47,7 @@ RUN python3 -OO -m nuitka \
     ./telerising.py
 
 RUN cd telerising.dist/ \
+    && mv ./telerising.bin ./telerising \
     && /usr/local/sbin/processLibs
 
 RUN cd telerising.dist/ \
