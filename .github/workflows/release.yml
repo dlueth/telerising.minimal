@@ -1,0 +1,15 @@
+name: Release
+on:
+  workflow_dispatch:
+  repository_dispatch:
+env:
+  DEBIAN_FRONTEND: noninteractive
+  TEMPORARY_DIRECTORY: /home/runner/work/_temp
+jobs:
+  main:
+    name: Main
+    runs-on: ubuntu-latest
+    steps:
+      - name: Debug
+        run: |
+          echo "Event '${{ github.event.action }}', hash '${{ github.event.client_payload.hash }}', tag '${{ github.event.client_payload.tag }}'"
