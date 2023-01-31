@@ -32,6 +32,9 @@ jobs:
           password: ${{ secrets.DOCKER_HUB_TOKEN }}
       - name: Build image
         run: |
+          echo "${github.event.client_payload.hash}"
+          echo "${github.event.client_payload.tag}"
+          exit 0;
           DOCKER_TAG_HASH="${github.event.client_payload.hash}-$(date +'%Y%m%d-%H%M%S')"
           DOCKER_TAG_VERSION="${github.event.client_payload.tag}"
           DOCKER_TAG_LATEST="latest"
