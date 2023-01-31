@@ -37,6 +37,7 @@ jobs:
           DOCKER_TAG_LATEST="latest"
           
           git submodule init
+          git submodule update
           cd ./telerising
           git fetch --all --tags
           git checkout ${{ github.event.client_payload.tag }}
