@@ -36,10 +36,12 @@ jobs:
           DOCKER_TAG_VERSION="${{ github.event.client_payload.tag }}"
           DOCKER_TAG_LATEST="latest"
           
+          git submodule init
           cd ./telerising
           git fetch --all --tags
           git checkout ${{ github.event.client_payload.tag }}
           cd -
-          git status
+          # git commit -a -m "chore: release"
+          # git tag -a ${{ github.event.client_payload.tag }} -m ""
 
           # docker buildx build --platform linux/amd64,linux/arm64,linux/arm/v7 --compress --no-cache --force-rm --push -t qoopido/telerising.minimal:${DOCKER_TAG_HASH} -t qoopido/telerising.minimal:${DOCKER_TAG_VERSION} -t qoopido/telerising.minimal:${DOCKER_TAG_LATEST} .
