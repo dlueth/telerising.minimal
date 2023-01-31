@@ -38,10 +38,10 @@ jobs:
           DOCKER_TAG_VERSION="${{ github.event.client_payload.tag }}"
           DOCKER_TAG_LATEST="latest"
           
-          git submodule init
-          git submodule update
+          # git submodule init
+          # git submodule update
           cd ./telerising
-          git fetch --all --tags
+          # git fetch --all --tags
           git checkout ${{ github.event.client_payload.tag }}
           cd -
           # git commit -a -m "chore: release"
