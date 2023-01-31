@@ -37,7 +37,8 @@ jobs:
           DOCKER_TAG_LATEST="latest"
           
           cd ./telerising
-          git checkout ${{ github.event.client_payload.hash }}
+          git fetch --all --tags
+          git checkout ${{ github.event.client_payload.tag }}
           cd -
           git status
 
