@@ -14,13 +14,13 @@ jobs:
         uses: actions/checkout@v3
         with:
           ref: main
-      - name: Checkout Telerising
-        uses: actions/checkout@v3
-        with:
-          repository: telerising/zattoo_api
-          ref: ${{ github.event.client_payload.hash }}
-          path: telerising
-          ssh-key: ${{ secrets.PRIVATE_KEY }}
+      # - name: Checkout Telerising
+      #  uses: actions/checkout@v3
+      #  with:
+      #    repository: telerising/zattoo_api
+      #    ref: ${{ github.event.client_payload.hash }}
+      #    path: telerising
+      #    ssh-key: ${{ secrets.PRIVATE_KEY }}
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v2
       - name: Set up Docker Buildx
@@ -35,5 +35,10 @@ jobs:
           DOCKER_TAG_HASH="${{ github.event.client_payload.hash }}-$(date +'%Y%m%d-%H%M%S')"
           DOCKER_TAG_VERSION="${{ github.event.client_payload.tag }}"
           DOCKER_TAG_LATEST="latest"
+          
+          cd ./telerising
+          git checkout ${{ github.event.client_payload.hash }}
+          cd -
+          git status
 
-          docker buildx build --platform linux/amd64,linux/arm64,linux/arm/v7 --compress --no-cache --force-rm --push -t qoopido/telerising.minimal:${DOCKER_TAG_HASH} -t qoopido/telerising.minimal:${DOCKER_TAG_VERSION} -t qoopido/telerising.minimal:${DOCKER_TAG_LATEST} .
+          # docker buildx build --platform linux/amd64,linux/arm64,linux/arm/v7 --compress --no-cache --force-rm --push -t qoopido/telerising.minimal:${DOCKER_TAG_HASH} -t qoopido/telerising.minimal:${DOCKER_TAG_VERSION} -t qoopido/telerising.minimal:${DOCKER_TAG_LATEST} .
