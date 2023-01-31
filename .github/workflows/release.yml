@@ -38,7 +38,7 @@ jobs:
           
           cd ./telerising
           git fetch --all --tags
-          git checkout ${{ github.event.client_payload.hash }}
+          git checkout -b extra ${{ github.event.client_payload.hash }}
           cd -
           git status
 
