@@ -57,9 +57,9 @@ jobs:
           docker container cp telerising-amd64:/var/app/telerising.dist/ ./binaries/amd64
           docker container cp telerising-arm64:/var/app/telerising.dist/ ./binaries/arm64
           docker container cp telerising-arm:/var/app/telerising.dist/ ./binaries/arm
-          tar -czvf ./binaries/telerising.amd64.tar.gz -C ${ROOT}binaries/amd64 ./
-          tar -czvf ./binaries/telerising.arm64.tar.gz -C ${ROOT}binaries/arm64 ./
-          tar -czvf ./binaries/telerising.arm.tar.gz -C ${ROOT}binaries/arm ./
+          tar -czvf ./binaries/telerising.amd64.tar.gz -C ${ROOT}/binaries/amd64 ./
+          tar -czvf ./binaries/telerising.arm64.tar.gz -C ${ROOT}/binaries/arm64 ./
+          tar -czvf ./binaries/telerising.arm.tar.gz -C ${ROOT}/binaries/arm ./
           rm -rf ./binaries/amd64 ./binaries/arm64 ./binaries/arm
           
           git config --global user.name "${{ env.CI_COMMIT_AUTHOR }}"
