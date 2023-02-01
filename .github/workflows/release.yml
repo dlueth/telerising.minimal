@@ -5,6 +5,9 @@ on:
 env:
   DEBIAN_FRONTEND: noninteractive
   TEMPORARY_DIRECTORY: /home/runner/work/_temp
+  CI_COMMIT_MESSAGE: "chore: release"
+  CI_COMMIT_AUTHOR: CI
+  CI_COMMIT_EMAIL: ci@qoopido.com
 jobs:
   build:
     name: Build multiarch images
@@ -34,6 +37,7 @@ jobs:
           password: ${{ secrets.DOCKER_HUB_TOKEN }}
       - name: Build image
         run: |
+          ROOT=$(pwd)
           DOCKER_TAG_HASH="${{ github.event.client_payload.hash }}-$(date +'%Y%m%d-%H%M%S')"
           DOCKER_TAG_VERSION="${{ github.event.client_payload.tag }}"
           DOCKER_TAG_LATEST="latest"
@@ -58,7 +62,9 @@ jobs:
           tar -czvf ./binaries/telerising.arm.tar.gz -C ${ROOT}binaries/arm ./
           rm -rf ./binaries/amd64 ./binaries/arm64 ./binaries/arm
           
+          git config --global user.name "${{ env.CI_COMMIT_AUTHOR }}"
+          git config --global user.email "${{ env.CI_COMMIT_EMAIL }}"
           git add telerising
-          git commit -a -m "chore: release"
-          git tag -a ${{ github.event.client_payload.tag }} -m ""
+          git commit -a -m "${{ env.CI_COMMIT_MESSAGE }}"
+          #git tag -a ${{ github.event.client_payload.tag }} -m ""
           git push
