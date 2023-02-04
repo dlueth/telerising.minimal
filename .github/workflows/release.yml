@@ -64,7 +64,6 @@ jobs:
       - name: Create release
         uses: softprops/action-gh-release@v1
         with:
-          token: ${{ secrets.PRIVATE_KEY }}
           draft: false
           prerelease: false
           generate_release_notes: true
