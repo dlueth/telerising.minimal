@@ -62,40 +62,16 @@ jobs:
           # git tag -a -f ${{ github.event.client_payload.tag }} -m ""
           # git push
       - name: Create release
-        id: release
-        uses: actions/create-release@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.PRIVATE_KEY }}
+        uses: softprops/action-gh-release@v1
         with:
+          token: ${{ secrets.PRIVATE_KEY }}
           draft: false
           prerelease: false
-          release_name: ${{ github.event.client_payload.tag }}
+          generate_release_notes: true
+          name: ${{ github.event.client_payload.tag }}
           tag_name: ${{ github.event.client_payload.tag }}
+          files: |
+            ./binaries/telerising.amd64.tar.gz
+            ./binaries/telerising.arm64.tar.gz
+            ./binaries/telerising.arm.tar.gz
           # body: ""
-      - name: Upload amd64 binary
-        uses: actions/upload-release-asset@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.PRIVATE_KEY }}
-        with:
-          upload_url: ${{ steps.release.outputs.upload_url }}
-          asset_path: ./binaries/telerising.amd64.tar.gz
-          asset_name: telerising.amd64.tar.gz
-          asset_content_type: application/gzip
-      - name: Upload arm64 binary
-        uses: actions/upload-release-asset@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.PRIVATE_KEY }}
-        with:
-          upload_url: ${{ steps.release.outputs.upload_url }}
-          asset_path: ./binaries/telerising.arm64.tar.gz
-          asset_name: telerising.arm64.tar.gz
-          asset_content_type: application/gzip
-      - name: Upload arm/v7 binary
-        uses: actions/upload-release-asset@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.PRIVATE_KEY }}
-        with:
-          upload_url: ${{ steps.release.outputs.upload_url }}
-          asset_path: ./binaries/telerising.arm.tar.gz
-          asset_name: telerising.arm.tar.gz
-          asset_content_type: application/gzip
