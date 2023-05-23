@@ -12,7 +12,6 @@ jobs:
   build:
     name: Build multiarch images
     runs-on: ubuntu-latest
-    env:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v3
