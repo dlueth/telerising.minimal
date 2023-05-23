@@ -12,6 +12,7 @@ jobs:
   build:
     name: Build multiarch images
     runs-on: ubuntu-latest
+    env:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v3
@@ -28,14 +29,27 @@ jobs:
         with:
           username: ${{ secrets.DOCKER_HUB_USER }}
           password: ${{ secrets.DOCKER_HUB_TOKEN }}
-      - name: Build image
+      - name: Setup environment
         run: |
           ROOT=$(pwd)
           DOCKER_TAG_HASH="${{ github.event.client_payload.hash }}-$(date +'%Y%m%d-%H%M%S')"
           DOCKER_TAG_VERSION="${{ github.event.client_payload.tag }}"
+          DOCKER_TAG_VARIANT="${{ github.event.client_payload.variant }}"
           DOCKER_TAG_LATEST="latest"
+
+          if [ ! -z "${DOCKER_TAG_VARIANT}" ]
+          then
+            DOCKER_TAG_VERSION = "${DOCKER_TAG_VERSION}-${DOCKER_TAG_VARIANT}"
+          fi
           
-          echo "${DOCKER_TAG_VERSION}";
+          echo "ROOT=${ROOT}" >> "${GITHUB_ENV}"
+          echo "DOCKER_TAG_HASH=${DOCKER_TAG_HASH}" >> "${GITHUB_ENV}"
+          echo "DOCKER_TAG_VERSION=${DOCKER_TAG_VERSION}" >> "${GITHUB_ENV}"
+          echo "DOCKER_TAG_VARIANT=${DOCKER_TAG_VARIANT}" >> "${GITHUB_ENV}"
+          echo "DOCKER_TAG_LATEST=${DOCKER_TAG_LATEST}" >> "${GITHUB_ENV}"
+      - name: Build image
+        run: |
+          echo "${{ env.DOCKER_TAG_VERSION }}";
           
           exit 1
           
