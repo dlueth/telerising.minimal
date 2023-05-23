@@ -35,6 +35,10 @@ jobs:
           DOCKER_TAG_VERSION="${{ github.event.client_payload.tag }}"
           DOCKER_TAG_LATEST="latest"
           
+          echo "${DOCKER_TAG_VERSION}";
+          
+          exit 1
+          
           cd ./telerising
           git checkout ${{ github.event.client_payload.tag }}
           cd -
