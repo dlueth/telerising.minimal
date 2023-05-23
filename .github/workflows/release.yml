@@ -48,15 +48,11 @@ jobs:
           echo "DOCKER_TAG_LATEST=${DOCKER_TAG_LATEST}" >> "${GITHUB_ENV}"
       - name: Build image
         run: |
-          echo "${{ env.DOCKER_TAG_VERSION }}";
-          
-          exit 1
-          
           cd ./telerising
           git checkout ${{ github.event.client_payload.tag }}
           cd -
           
-          docker buildx build --platform linux/amd64,linux/arm64,linux/arm/v7 --compress --no-cache --force-rm --push -t qoopido/telerising.minimal:${DOCKER_TAG_HASH} -t qoopido/telerising.minimal:${DOCKER_TAG_VERSION} -t qoopido/telerising.minimal:${DOCKER_TAG_LATEST} .
+          docker buildx build --platform linux/amd64,linux/arm64,linux/arm/v7 --compress --no-cache --force-rm --push -t qoopido/telerising.minimal:${{ env.DOCKER_TAG_HASH }} -t qoopido/telerising.minimal:${{ env.DOCKER_TAG_VERSION }} -t qoopido/telerising.minimal:${{ env.DOCKER_TAG_LATEST }} .
           docker buildx build --platform linux/amd64 --target builder --compress --load -t qoopido/telerising.minimal:amd64-builder .
           docker buildx build --platform linux/arm64 --target builder --compress --load -t qoopido/telerising.minimal:arm64-builder .
           docker buildx build --platform linux/arm/v7 --target builder --compress --load -t qoopido/telerising.minimal:arm-builder .
@@ -67,16 +63,16 @@ jobs:
           docker container cp telerising-amd64:/var/app/telerising.dist/ ./binaries/amd64
           docker container cp telerising-arm64:/var/app/telerising.dist/ ./binaries/arm64
           docker container cp telerising-arm:/var/app/telerising.dist/ ./binaries/arm
-          tar -czvf ./binaries/telerising.amd64.tar.gz -C ${ROOT}/binaries/amd64 ./
-          tar -czvf ./binaries/telerising.arm64.tar.gz -C ${ROOT}/binaries/arm64 ./
-          tar -czvf ./binaries/telerising.arm.tar.gz -C ${ROOT}/binaries/arm ./
+          tar -czvf ./binaries/telerising.amd64.tar.gz -C ${{ env.ROOT }}/binaries/amd64 ./
+          tar -czvf ./binaries/telerising.arm64.tar.gz -C ${{ env.ROOT }}/binaries/arm64 ./
+          tar -czvf ./binaries/telerising.arm.tar.gz -C ${{ env.ROOT }}/binaries/arm ./
           rm -rf ./binaries/amd64 ./binaries/arm64 ./binaries/arm
           
           git config --global user.name "${{ env.CI_COMMIT_AUTHOR }}"
           git config --global user.email "${{ env.CI_COMMIT_EMAIL }}"
           git add telerising
           git commit -a -m "${{ env.CI_COMMIT_MESSAGE }}"
-          git tag -a -f ${{ github.event.client_payload.tag }} -m ""
+          git tag -a -f ${{ env.DOCKER_TAG_VERSION }} -m ""
           git push
       - name: Create release
         uses: softprops/action-gh-release@v1
@@ -84,8 +80,8 @@ jobs:
           draft: false
           prerelease: false
           generate_release_notes: true
-          name: ${{ github.event.client_payload.tag }}
-          tag_name: ${{ github.event.client_payload.tag }}
+          name: ${{ env.DOCKER_TAG_VERSION }}
+          tag_name: ${{ env.DOCKER_TAG_VERSION }}
           files: |
             ./binaries/telerising.amd64.tar.gz
             ./binaries/telerising.arm64.tar.gz
