@@ -1,4 +1,4 @@
-FROM python:3.9-slim-bullseye as base
+FROM python:3.9-slim-buster as base
 
 ENV APT_DEPENDENCIES="build-essential ccache libfuse-dev patchelf upx scons" \
     PIP_DEPENDENCIES="nuitka ordered-set pipreqs" \
