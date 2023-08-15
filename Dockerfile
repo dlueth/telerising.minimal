@@ -1,6 +1,6 @@
 FROM python:3.9-slim-buster as base
 
-ENV APT_DEPENDENCIES="build-essential ccache libfuse-dev patchelf upx scons" \
+ENV APT_DEPENDENCIES="build-essential ccache libfuse-dev upx scons git dh-autoreconf" \
     PIP_DEPENDENCIES="nuitka ordered-set pipreqs" \
     DEBIAN_FRONTEND="noninteractive" \
     TERM=xterm
@@ -18,6 +18,17 @@ RUN \
     ### install apt packages
     && apt-get -qy update \
     && apt-get install -qy ${APT_DEPENDENCIES} \
+    ### install patchelf \
+    && cd /tmp \
+    && git clone https://github.com/brenoguim/patchelf.git \
+    && cd patchelf \
+    # && git checkout breno.474 \
+    && ./bootstrap.sh \
+    && mkdir build \
+    && cd build \
+    && ../configure \
+    && make \
+    && make install \
     ### setup python 3
     && python3 -m ensurepip \
     && python3 -m pip install --no-cache --upgrade ${PIP_DEPENDENCIES}
