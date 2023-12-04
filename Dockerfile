@@ -1,7 +1,7 @@
 FROM python:3.9-slim-buster as base
 
 ENV APT_DEPENDENCIES="build-essential ccache libfuse-dev libffi-dev upx scons git dh-autoreconf zlib1g zlib1g-dev" \
-    PIP_DEPENDENCIES="wheel cffi nuitka~=1.8 ordered-set pipreqs" \
+    PIP_DEPENDENCIES="wheel cffi nuitka=1.8.6 ordered-set pipreqs" \
     DEBIAN_FRONTEND="noninteractive" \
     TERM=xterm
 
@@ -32,7 +32,7 @@ RUN \
     ### setup python 3
     && python3 -m ensurepip \
     && python3 -m pip install --upgrade pip \
-    && python3 -m pip install --no-cache --upgrade ${PIP_DEPENDENCIES}
+    && python3 -m pip install --no-cache ${PIP_DEPENDENCIES}
 
 FROM base as builder
 
