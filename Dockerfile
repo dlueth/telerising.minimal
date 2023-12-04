@@ -1,7 +1,7 @@
 FROM python:3.9-slim-buster as base
 
-ENV APT_DEPENDENCIES="build-essential ccache libfuse-dev libffi-dev upx scons git dh-autoreconf" \
-    PIP_DEPENDENCIES="wheel cffi nuitka ordered-set pipreqs" \
+ENV APT_DEPENDENCIES="build-essential ccache libfuse-dev libffi-dev upx scons git dh-autoreconf zlib1g zlib1g-dev" \
+    PIP_DEPENDENCIES="wheel cffi nuitka~=1.8 ordered-set pipreqs" \
     DEBIAN_FRONTEND="noninteractive" \
     TERM=xterm
 
