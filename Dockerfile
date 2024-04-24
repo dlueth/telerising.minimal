@@ -15,7 +15,8 @@ RUN \
     && echo "path-exclude=/usr/share/man/*" >> /etc/dpkg/dpkg.cfg.d/docker-noman \
     && echo "path-exclude=/usr/share/doc/*" >> /etc/dpkg/dpkg.cfg.d/docker-nodoc \
     && echo "path-include=/usr/share/doc/*/copyright" >> /etc/dpkg/dpkg.cfg.d/docker-nodoc \
-    ### install apt packages
+    ### install apt packages \
+    && apt-get -qy remove cmake \
     && apt-get -qy update \
     && apt-get install -qy ${APT_DEPENDENCIES} \
     ### install patchelf \
@@ -32,6 +33,7 @@ RUN \
     ### setup python 3
     && python3 -m ensurepip \
     && python3 -m pip install --upgrade pip \
+    && python3 -m pip install cmake --upgrade \
     && python3 -m pip install --no-cache ${PIP_DEPENDENCIES}
 
 FROM base as builder
