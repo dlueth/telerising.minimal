@@ -1,6 +1,7 @@
 FROM python:3.9-slim-buster as base
 
-ENV APT_DEPENDENCIES="build-essential ccache libfuse-dev libffi-dev upx scons git dh-autoreconf zlib1g zlib1g-dev ca-certificates gpg wget" \
+# ca-certificates gpg wget
+ENV APT_DEPENDENCIES="build-essential ccache libfuse-dev libffi-dev upx scons git dh-autoreconf zlib1g zlib1g-dev" \
     PIP_DEPENDENCIES="wheel cffi nuitka ordered-set pipreqs" \
     DEBIAN_FRONTEND="noninteractive" \
     TERM=xterm
@@ -19,13 +20,13 @@ RUN \
     && apt-get -qy update \
     && apt-get install -qy ${APT_DEPENDENCIES} \
     ### update certficates
-    && update-ca-certificates \
+    # && update-ca-certificates \
     ### install cmake \
-    && wget -O - https://apt.kitware.com/keys/kitware-archive-latest.asc 2>/dev/null | gpg --dearmor - | tee /usr/share/keyrings/kitware-archive-keyring.gpg >/dev/null \
-    && echo 'deb [signed-by=/usr/share/keyrings/kitware-archive-keyring.gpg] https://apt.kitware.com/ubuntu/ jammy main' | tee /etc/apt/sources.list.d/kitware.list >/dev/null \
-    && apt-get -qy update \
-    && test -f /usr/share/doc/kitware-archive-keyring/copyright || rm -rf /usr/share/keyrings/kitware-archive-keyring.gpg \
-    && apt-get install -qy kitware-archive-keyring \
+    # && wget -O - https://apt.kitware.com/keys/kitware-archive-latest.asc 2>/dev/null | gpg --dearmor - | tee /usr/share/keyrings/kitware-archive-keyring.gpg >/dev/null \
+    # && echo 'deb [signed-by=/usr/share/keyrings/kitware-archive-keyring.gpg] https://apt.kitware.com/ubuntu/ jammy main' | tee /etc/apt/sources.list.d/kitware.list >/dev/null \
+    # && apt-get -qy update \
+    # && test -f /usr/share/doc/kitware-archive-keyring/copyright || rm -rf /usr/share/keyrings/kitware-archive-keyring.gpg \
+    # && apt-get install -qy kitware-archive-keyring \
     ### install patchelf \
     && cd /tmp \
     && git clone https://github.com/brenoguim/patchelf.git \
