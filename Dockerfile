@@ -32,7 +32,7 @@ RUN \
     ### setup python 3
     && python3 -m ensurepip \
     && python3 -m pip install --upgrade pip \
-    && python3 -m pip install cmake --upgrade \
+    && python3 -m pip install --upgrade cmake \
     && python3 -m pip install --no-cache ${PIP_DEPENDENCIES}
 
 FROM base as builder
