@@ -16,9 +16,10 @@ RUN \
     && echo "path-exclude=/usr/share/doc/*" >> /etc/dpkg/dpkg.cfg.d/docker-nodoc \
     && echo "path-include=/usr/share/doc/*/copyright" >> /etc/dpkg/dpkg.cfg.d/docker-nodoc \
     ### install apt packages \
-    && apt-get -qy remove cmake \
     && apt-get -qy update \
+    && apt-get -qy remove cmake \
     && apt-get install -qy ${APT_DEPENDENCIES} \
+    && apt-get -qy remove cmake \
     ### install patchelf \
     && cd /tmp \
     && git clone https://github.com/brenoguim/patchelf.git \
