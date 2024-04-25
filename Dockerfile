@@ -19,16 +19,15 @@ RUN \
     && apt-get -qy update \
     && apt-get install -qy ${APT_DEPENDENCIES} \
     ### install patchelf \
-    # && cd /tmp \
-    # && git clone https://github.com/brenoguim/patchelf.git \
-    # && cd patchelf \
-    # && git checkout breno.474 \
-    # && ./bootstrap.sh \
-    # && mkdir build \
-    # && cd build \
-    # && ../configure \
-    # && make \
-    # && make install \
+    && cd /tmp \
+    && git clone https://github.com/brenoguim/patchelf.git \
+    && cd patchelf \
+    && ./bootstrap.sh \
+    && mkdir build \
+    && cd build \
+    && ../configure \
+    && make \
+    && make install \
     ### setup python 3
     && python3 -m ensurepip \
     && python3 -m pip install --no-cache --upgrade pip \
