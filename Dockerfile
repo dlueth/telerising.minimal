@@ -1,8 +1,7 @@
 FROM python:3.9-slim-buster as base
 
-# ca-certificates gpg wget
 ENV APT_DEPENDENCIES="build-essential ccache libfuse-dev libffi-dev upx scons git dh-autoreconf zlib1g zlib1g-dev" \
-    PIP_DEPENDENCIES="wheel cffi nuitka ordered-set pipreqs" \
+    PIP_DEPENDENCIES="wheel cffi nuitka ordered-set pipreqs==0.4.13" \
     DEBIAN_FRONTEND="noninteractive" \
     TERM=xterm
 
@@ -19,28 +18,20 @@ RUN \
     ### install apt packages \
     && apt-get -qy update \
     && apt-get install -qy ${APT_DEPENDENCIES} \
-    ### update certficates
-    # && update-ca-certificates \
-    ### install cmake \
-    # && wget -O - https://apt.kitware.com/keys/kitware-archive-latest.asc 2>/dev/null | gpg --dearmor - | tee /usr/share/keyrings/kitware-archive-keyring.gpg >/dev/null \
-    # && echo 'deb [signed-by=/usr/share/keyrings/kitware-archive-keyring.gpg] https://apt.kitware.com/ubuntu/ jammy main' | tee /etc/apt/sources.list.d/kitware.list >/dev/null \
-    # && apt-get -qy update \
-    # && test -f /usr/share/doc/kitware-archive-keyring/copyright || rm -rf /usr/share/keyrings/kitware-archive-keyring.gpg \
-    # && apt-get install -qy kitware-archive-keyring \
     ### install patchelf \
-    && cd /tmp \
-    && git clone https://github.com/brenoguim/patchelf.git \
-    && cd patchelf \
+    # && cd /tmp \
+    # && git clone https://github.com/brenoguim/patchelf.git \
+    # && cd patchelf \
     # && git checkout breno.474 \
-    && ./bootstrap.sh \
-    && mkdir build \
-    && cd build \
-    && ../configure \
-    && make \
-    && make install \
+    # && ./bootstrap.sh \
+    # && mkdir build \
+    # && cd build \
+    # && ../configure \
+    # && make \
+    # && make install \
     ### setup python 3
     && python3 -m ensurepip \
-    && python3 -m pip install --upgrade pip \
+    && python3 -m pip install --no-cache --upgrade pip \
     && python3 -m pip install --no-cache ${PIP_DEPENDENCIES}
 
 FROM base as builder
@@ -53,6 +44,7 @@ COPY root /
 
 RUN mv run.py telerising.py \
     && pipreqs ./ \
+    && cat requirements.txt \
     && python3 -m pip install --no-cache --upgrade -r requirements.txt
 
 RUN python3 -OO -m nuitka \

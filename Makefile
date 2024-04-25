@@ -27,6 +27,19 @@ amd64:
 	docker ps --format "{{.Image}} {{.ID}}" | grep "qoopido/telerising.minimal" | cut -d " " -f 2 | xargs -I {} docker stop {} > /dev/null
 	docker ps -a --format "{{.Image}} {{.ID}}" | grep "qoopido/telerising.minimal" | cut -d " " -f 2 | xargs -I {} docker rm --force {} > /dev/null
 
+arm:
+	docker ps --format "{{.Image}} {{.ID}}" | grep "qoopido/telerising.minimal" | cut -d " " -f 2 | xargs -I {} docker stop {} > /dev/null
+	docker ps -a --format "{{.Image}} {{.ID}}" | grep "qoopido/telerising.minimal" | cut -d " " -f 2 | xargs -I {} docker rm --force {} > /dev/null
+	# docker buildx build --progress plain --platform linux/arm/v7 --no-cache --compress --load -t qoopido/telerising.minimal:debug .
+	docker buildx build --progress plain --platform linux/arm/v7 --target builder --compress --load -t qoopido/telerising.minimal:arm-builder .
+	docker create --name=telerising-arm --platform linux/arm/v7 qoopido/telerising.minimal:arm-builder
+	rm -rf ./binaries/*
+	docker container cp telerising-arm:/var/app/telerising.dist/ ./binaries/arm
+	tar -czvf ./binaries/telerising.arm.tar.gz -C ${ROOT}binaries/arm ./
+	rm -rf ./binaries/arm
+	docker ps --format "{{.Image}} {{.ID}}" | grep "qoopido/telerising.minimal" | cut -d " " -f 2 | xargs -I {} docker stop {} > /dev/null
+	docker ps -a --format "{{.Image}} {{.ID}}" | grep "qoopido/telerising.minimal" | cut -d " " -f 2 | xargs -I {} docker rm --force {} > /dev/null
+
 build:
 	docker ps --format "{{.Image}} {{.ID}}" | grep "qoopido/telerising.minimal" | cut -d " " -f 2 | xargs -I {} docker stop {} > /dev/null
 	docker ps -a --format "{{.Image}} {{.ID}}" | grep "qoopido/telerising.minimal" | cut -d " " -f 2 | xargs -I {} docker rm --force {} > /dev/null
