@@ -14,52 +14,46 @@ clean:
 	docker ps -a --format "{{.Image}} {{.ID}}" | grep "qoopido/telerising.minimal" | cut -d " " -f 2 | xargs -I {} docker rm --force {} > /dev/null
 	docker images --format "{{.Repository}}:{{.ID}}" | grep "qoopido/telerising.minimal" | sed -n -e "s/^qoopido\/telerising.minimal://p" | xargs -I {} docker rmi --force {} > /dev/null
 
-amd64:
-	docker ps --format "{{.Image}} {{.ID}}" | grep "qoopido/telerising.minimal" | cut -d " " -f 2 | xargs -I {} docker stop {} > /dev/null
-	docker ps -a --format "{{.Image}} {{.ID}}" | grep "qoopido/telerising.minimal" | cut -d " " -f 2 | xargs -I {} docker rm --force {} > /dev/null
-	# docker buildx build --progress plain --platform linux/amd64 --no-cache --compress --load -t qoopido/telerising.minimal:debug .
-	docker buildx build --progress plain --platform linux/amd64 --target builder --compress --load -t qoopido/telerising.minimal:amd64-builder .
-	docker create --name=telerising-amd64 --platform linux/amd64 qoopido/telerising.minimal:amd64-builder
-	rm -rf ./binaries/*
-	docker container cp telerising-amd64:/var/app/telerising.dist/ ./binaries/amd64
-	tar -czvf ./binaries/telerising.amd64.tar.gz -C ${ROOT}binaries/amd64 ./
-	rm -rf ./binaries/amd64
-	docker ps --format "{{.Image}} {{.ID}}" | grep "qoopido/telerising.minimal" | cut -d " " -f 2 | xargs -I {} docker stop {} > /dev/null
-	docker ps -a --format "{{.Image}} {{.ID}}" | grep "qoopido/telerising.minimal" | cut -d " " -f 2 | xargs -I {} docker rm --force {} > /dev/null
-
-arm:
-	docker ps --format "{{.Image}} {{.ID}}" | grep "qoopido/telerising.minimal" | cut -d " " -f 2 | xargs -I {} docker stop {} > /dev/null
-	docker ps -a --format "{{.Image}} {{.ID}}" | grep "qoopido/telerising.minimal" | cut -d " " -f 2 | xargs -I {} docker rm --force {} > /dev/null
-	# docker buildx build --progress plain --platform linux/arm/v7 --no-cache --compress --load -t qoopido/telerising.minimal:debug .
-	docker buildx build --progress plain --platform linux/arm/v7 --target builder --compress --load -t qoopido/telerising.minimal:arm-builder .
-	docker create --name=telerising-arm --platform linux/arm/v7 qoopido/telerising.minimal:arm-builder
-	rm -rf ./binaries/*
-	docker container cp telerising-arm:/var/app/telerising.dist/ ./binaries/arm
-	tar -czvf ./binaries/telerising.arm.tar.gz -C ${ROOT}binaries/arm ./
-	rm -rf ./binaries/arm
-	docker ps --format "{{.Image}} {{.ID}}" | grep "qoopido/telerising.minimal" | cut -d " " -f 2 | xargs -I {} docker stop {} > /dev/null
-	docker ps -a --format "{{.Image}} {{.ID}}" | grep "qoopido/telerising.minimal" | cut -d " " -f 2 | xargs -I {} docker rm --force {} > /dev/null
+base:
+	docker ps --format "{{.Image}} {{.ID}}" | grep "qoopido/telerising.builder" | cut -d " " -f 2 | xargs -I {} docker stop {} > /dev/null
+	docker ps -a --format "{{.Image}} {{.ID}}" | grep "qoopido/telerising.builder" | cut -d " " -f 2 | xargs -I {} docker rm --force {} > /dev/null
+	docker ps -a --format "{{.Image}} {{.ID}}" | grep "qoopido/telerising.builder" | cut -d " " -f 2 | xargs -I {} docker rmi --force {} > /dev/null
+	docker buildx build --platform linux/amd64 --target base --compress --no-cache --force-rm --push -t qoopido/telerising.builder:amd64 -f Dockerfile.default .
+	# docker buildx build --platform linux/arm64/v8 --target base --compress --no-cache --force-rm --push -t qoopido/telerising.builder:arm64v8 -f Dockerfile.default .
+	docker buildx build --platform linux/arm64/v8 --target base --compress --no-cache --force-rm --push -t qoopido/telerising.builder:arm64v8 -f Dockerfile.arm64v8.16k .
+	docker buildx build --platform linux/arm/v7 --target base --compress --no-cache --force-rm --push -t qoopido/telerising.builder:arm32v7 -f Dockerfile.default .
+	docker buildx build --platform linux/arm/v6 --target base --compress --no-cache --force-rm --push -t qoopido/telerising.builder:arm32v6 -f Dockerfile.arm32v6.4k .
+	docker manifest create qoopido/telerising.builder:latest --amend qoopido/telerising.builder:amd64 --amend qoopido/telerising.builder:arm64v8 --amend qoopido/telerising.builder:arm32v7 --amend qoopido/telerising.builder:arm32v6
+	docker manifest annotate --arch linux/amd64 qoopido/telerising.builder:latest qoopido/telerising.builder:amd64
+	docker manifest annotate --arch linux/arm64/v8 qoopido/telerising.builder:latest qoopido/telerising.builder:arm64v8
+	docker manifest annotate --arch linux/arm/v7 qoopido/telerising.builder:latest qoopido/telerising.builder:arm32v7
+	docker manifest annotate --arch linux/arm/v6 qoopido/telerising.builder:latest qoopido/telerising.builder:arm32v6
+	docker manifest push qoopido/telerising.builder:latest
 
 build:
+	docker ps --format "{{.Image}} {{.ID}}" | grep "qoopido/telerising.build" | cut -d " " -f 2 | xargs -I {} docker stop {} > /dev/null
+	docker ps -a --format "{{.Image}} {{.ID}}" | grep "qoopido/telerising.build" | cut -d " " -f 2 | xargs -I {} docker rm --force {} > /dev/null
 	docker ps --format "{{.Image}} {{.ID}}" | grep "qoopido/telerising.minimal" | cut -d " " -f 2 | xargs -I {} docker stop {} > /dev/null
 	docker ps -a --format "{{.Image}} {{.ID}}" | grep "qoopido/telerising.minimal" | cut -d " " -f 2 | xargs -I {} docker rm --force {} > /dev/null
-	docker buildx build --platform linux/amd64,linux/arm64,linux/arm/v7 --no-cache --compress --push -t qoopido/telerising.minimal:debug .
-	docker buildx build --platform linux/amd64 --target builder --compress --load -t qoopido/telerising.minimal:amd64-builder .
-	docker buildx build --platform linux/arm64 --target builder --compress --load -t qoopido/telerising.minimal:arm64-builder .
-	docker buildx build --platform linux/arm/v7 --target builder --compress --load -t qoopido/telerising.minimal:arm-builder .
-	docker create --name=telerising-amd64 --platform linux/amd64 qoopido/telerising.minimal:amd64-builder
-	docker create --name=telerising-arm64 --platform linux/arm64 qoopido/telerising.minimal:arm64-builder
-	docker create --name=telerising-arm --platform linux/arm/v7 qoopido/telerising.minimal:arm-builder
+	docker buildx build --progress=plain --platform linux/amd64 --target build --no-cache --force-rm --compress --load -t qoopido/telerising.build:amd64 -f Dockerfile.build .
+	docker buildx build --progress=plain --platform linux/arm64/v8 --target build --no-cache --force-rm --compress --load -t qoopido/telerising.build:arm64v8 -f Dockerfile.build .
+	docker buildx build --progress=plain --platform linux/arm/v7 --target build --no-cache --force-rm --compress --load -t qoopido/telerising.build:arm32v7 -f Dockerfile.build .
+	docker buildx build --progress=plain --platform linux/arm/v6 --target build --no-cache --force-rm --compress --load -t qoopido/telerising.build:arm32v6 -f Dockerfile.build .
+	docker create --name=telerising-amd64 --platform linux/amd64 qoopido/telerising.build:amd64
+	docker create --name=telerising-arm64v8 --platform linux/arm64/v8 qoopido/telerising.build:arm64v8
+	docker create --name=telerising-arm32v7 --platform linux/arm/v7 qoopido/telerising.build:arm32v7
+	docker create --name=telerising-arm32v6 --platform linux/arm/v6 qoopido/telerising.build:arm32v6
 	rm -rf ./binaries/*
-	docker container cp telerising-amd64:/var/app/telerising.dist/ ./binaries/amd64
-	docker container cp telerising-arm64:/var/app/telerising.dist/ ./binaries/arm64
-	docker container cp telerising-arm:/var/app/telerising.dist/ ./binaries/arm
+	docker container cp telerising-amd64:/var/dist/ ./binaries/amd64
+	docker container cp telerising-arm64v8:/var/dist/ ./binaries/arm64v8
+	docker container cp telerising-arm32v7:/var/dist/ ./binaries/arm32v7
+	docker container cp telerising-arm32v6:/var/dist/ ./binaries/arm32v6
 	tar -czvf ./binaries/telerising.amd64.tar.gz -C ${ROOT}binaries/amd64 ./
-	tar -czvf ./binaries/telerising.arm64.tar.gz -C ${ROOT}binaries/arm64 ./
-	tar -czvf ./binaries/telerising.arm.tar.gz -C ${ROOT}binaries/arm ./
-	rm -rf ./binaries/amd64 ./binaries/arm64 ./binaries/arm
-	docker ps --format "{{.Image}} {{.ID}}" | grep "qoopido/telerising.minimal" | cut -d " " -f 2 | xargs -I {} docker stop {} > /dev/null
-	docker ps -a --format "{{.Image}} {{.ID}}" | grep "qoopido/telerising.minimal" | cut -d " " -f 2 | xargs -I {} docker rm --force {} > /dev/null
+	tar -czvf ./binaries/telerising.arm64v8.tar.gz -C ${ROOT}binaries/arm64v8 ./
+	tar -czvf ./binaries/telerising.arm32v7.tar.gz -C ${ROOT}binaries/arm32v7 ./
+	tar -czvf ./binaries/telerising.arm32v6.tar.gz -C ${ROOT}binaries/arm32v6 ./
+	rm -rf ./binaries/amd64 ./binaries/arm64v8 ./binaries/arm32v7 ./binaries/arm32v6
+	docker buildx build --progress=plain --platform linux/amd64,linux/arm64,linux/arm/v7,linux/arm/v6 --target dist --compress --load -t qoopido/telerising.minimal:manual -f Dockerfile.build .
 
 #############################
 # Argument fix workaround

@@ -53,22 +53,35 @@ jobs:
           git checkout ${{ github.event.client_payload.tag }}
           cd -
           
-          docker buildx build --platform linux/amd64,linux/arm64,linux/arm/v7 --compress --no-cache --force-rm --push -t qoopido/telerising.minimal:${{ env.DOCKER_TAG_HASH }} -t qoopido/telerising.minimal:${{ env.DOCKER_TAG_VERSION }} -t qoopido/telerising.minimal:${{ env.DOCKER_TAG_LATEST }} .
-          docker buildx build --platform linux/amd64 --target builder --compress --load -t qoopido/telerising.minimal:amd64-builder .
-          docker buildx build --platform linux/arm64 --target builder --compress --load -t qoopido/telerising.minimal:arm64-builder .
-          docker buildx build --platform linux/arm/v7 --target builder --compress --load -t qoopido/telerising.minimal:arm-builder .
-          docker create --name=telerising-amd64 --platform linux/amd64 qoopido/telerising.minimal:amd64-builder
-          docker create --name=telerising-arm64 --platform linux/arm64 qoopido/telerising.minimal:arm64-builder
-          docker create --name=telerising-arm --platform linux/arm/v7 qoopido/telerising.minimal:arm-builder
-          rm -rf ./binaries/*
-          docker container cp telerising-amd64:/var/app/telerising.dist/ ./binaries/amd64
-          docker container cp telerising-arm64:/var/app/telerising.dist/ ./binaries/arm64
-          docker container cp telerising-arm:/var/app/telerising.dist/ ./binaries/arm
-          tar -czvf ./binaries/telerising.amd64.tar.gz -C ${{ env.ROOT }}/binaries/amd64 ./
-          tar -czvf ./binaries/telerising.arm64.tar.gz -C ${{ env.ROOT }}/binaries/arm64 ./
-          tar -czvf ./binaries/telerising.arm.tar.gz -C ${{ env.ROOT }}/binaries/arm ./
-          rm -rf ./binaries/amd64 ./binaries/arm64 ./binaries/arm
+          echo "##### creating binary for linux/amd64 #####"
+          docker buildx build --progress=plain --platform linux/amd64 --target build --compress --no-cache --force-rm --load -t qoopido/telerising.build:amd64 -f Dockerfile.build .
+          echo "##### creating binary for linux/arm64/v8 #####"
+          docker buildx build --progress=plain --platform linux/arm64/v8 --target build --compress --no-cache --force-rm --load -t qoopido/telerising.build:arm64v8 -f Dockerfile.build .
+          echo "##### creating binary for linux/arm/v7 #####"
+          docker buildx build --progress=plain --platform linux/arm/v7 --target build --compress --no-cache --force-rm --load -t qoopido/telerising.build:arm32v7 -f Dockerfile.build .
+          echo "##### creating binary for linux/arm/v6 #####"
+          docker buildx build --progress=plain --platform linux/arm/v6 --target build --compress --no-cache --force-rm --load -t qoopido/telerising.build:arm32v6 -f Dockerfile.build .
           
+          echo "##### copying & compressing binaries from build container #####"
+          rm -rf ${ROOT}binaries/*
+          docker create --name=telerising-amd64 --platform linux/amd64 qoopido/telerising.build:amd64
+          docker create --name=telerising-arm64v8 --platform linux/arm64/v8 qoopido/telerising.build:arm64v8
+          docker create --name=telerising-arm32v7 --platform linux/arm/v7 qoopido/telerising.build:arm32v7
+          docker create --name=telerising-arm32v6 --platform linux/arm/v6 qoopido/telerising.build:arm32v6
+          docker container cp telerising-amd64:/var/dist/ ${ROOT}binaries/amd64
+          docker container cp telerising-arm64v8:/var/dist/ ${ROOT}binaries/arm64v8
+          docker container cp telerising-arm32v7:/var/dist/ ${ROOT}binaries/arm32v7
+          docker container cp telerising-arm32v6:/var/dist/ ${ROOT}binaries/arm32v6
+          tar -czvf ${ROOT}binaries/telerising.amd64.tar.gz -C ${ROOT}binaries/amd64 ${ROOT}
+          tar -czvf ${ROOT}binaries/telerising.arm64v8.tar.gz -C ${ROOT}binaries/arm64v8 ${ROOT}
+          tar -czvf ${ROOT}binaries/telerising.arm32v7.tar.gz -C ${ROOT}binaries/arm32v7 ${ROOT}
+          tar -czvf ${ROOT}binaries/telerising.arm32v6.tar.gz -C ${ROOT}binaries/arm32v6 ${ROOT}
+          rm -rf ${ROOT}binaries/amd64 ${ROOT}binaries/arm64v8 ${ROOT}binaries/arm32v7 ${ROOT}binaries/arm32v6
+          
+          echo "##### building multiarch container #####"
+          docker buildx build --progress=plain --platform linux/amd64,linux/arm64/v8,linux/arm/v7,linux/arm/v6 --target dist --compress --push -t qoopido/telerising.minimal:${{ env.DOCKER_TAG_HASH }} -t qoopido/telerising.minimal:${{ env.DOCKER_TAG_VERSION }} -t qoopido/telerising.minimal:${{ env.DOCKER_TAG_LATEST }} -f Dockerfile.build .
+          
+          echo "##### preparing GitHub release #####"
           git config --global user.name "${{ env.CI_COMMIT_AUTHOR }}"
           git config --global user.email "${{ env.CI_COMMIT_EMAIL }}"
           git add telerising
@@ -85,5 +98,6 @@ jobs:
           tag_name: ${{ env.DOCKER_TAG_VERSION }}
           files: |
             ./binaries/telerising.amd64.tar.gz
-            ./binaries/telerising.arm64.tar.gz
-            ./binaries/telerising.arm.tar.gz
+            ./binaries/telerising.arm64v8.tar.gz
+            ./binaries/telerising.arm32v7.tar.gz
+            ./binaries/telerising.arm32v6.tar.gz

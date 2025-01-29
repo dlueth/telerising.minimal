@@ -1,0 +1,55 @@
+# syntax=docker/dockerfile:1
+
+FROM qoopido/telerising.builder:latest AS build
+
+ARG TARGETPLATFORM
+ARG TARGETARCH
+ARG TARGETVARIANT
+ENV WORKDIR=/var/app
+WORKDIR ${WORKDIR}
+COPY telerising ${WORKDIR}/
+COPY root /
+
+RUN mv run.py telerising.py \
+    && pipreqs ./ \
+    && cat requirements.txt \
+    && python3 -m pip install --no-cache --upgrade -r requirements.txt \
+    && python3 -m pip install urllib3==1.26.12
+
+RUN python3 -OO -m nuitka \
+    --standalone \
+    --follow-stdlib \
+    --prefer-source-code \
+    --python-flag=-S,-OO \
+    --plugin-enable=anti-bloat,implicit-imports,data-files,pylint-warnings \
+    --include-data-dir=./app/static=app/static \
+    --include-data-dir=./app/templates=app/templates \
+    --warn-implicit-exceptions \
+    --warn-unusual-code \
+    ./telerising.py
+
+RUN cd telerising.dist/ \
+    && mv ./telerising.bin ./telerising \
+    && /usr/local/sbin/processLibs
+
+RUN cd telerising.dist/ \
+    && strip --strip-unneeded --strip-debug telerising \
+    && upx --best --overlay=strip telerising
+
+RUN cd /var/dist \
+    && cp -r ${WORKDIR}/telerising.dist/* ./
+
+
+FROM scratch AS dist
+
+ARG TARGETPLATFORM
+ARG TARGETARCH
+ARG TARGETVARIANT
+COPY --from=tarampampam/curl:latest /bin/curl /bin/curl
+COPY --from=build /var/dist/ /
+
+HEALTHCHECK --interval=30s --timeout=6s --retries=5 --start-period=30s CMD [ \
+    "/bin/curl", "--fail", "http://127.0.0.1:5000/" \
+]
+
+ENTRYPOINT [ "/telerising" ]

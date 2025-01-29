@@ -1,0 +1,35 @@
+FROM python:3.9-slim-buster as base
+
+ENV APT_DEPENDENCIES="build-essential ccache libfuse-dev libffi-dev upx scons git dh-autoreconf zlib1g zlib1g-dev ca-certificates" \
+    PIP_DEPENDENCIES="wheel cffi nuitka ordered-set pipreqs==0.4.13" \
+    DEBIAN_FRONTEND="noninteractive" \
+    TERM=xterm
+
+RUN \
+    ### tweak some apt & dpkg settings
+    echo "APT::Install-Recommends "0";" >> /etc/apt/apt.conf.d/docker-noinstall-recommends \
+    && echo "APT::Install-Suggests "0";" >> /etc/apt/apt.conf.d/docker-noinstall-suggests \
+    && echo "Dir::Cache "";" >> /etc/apt/apt.conf.d/docker-nocache \
+    && echo "Dir::Cache::archives "";" >> /etc/apt/apt.conf.d/docker-nocache \
+    && echo "path-exclude=/usr/share/locale/*" >> /etc/dpkg/dpkg.cfg.d/docker-nolocales \
+    && echo "path-exclude=/usr/share/man/*" >> /etc/dpkg/dpkg.cfg.d/docker-noman \
+    && echo "path-exclude=/usr/share/doc/*" >> /etc/dpkg/dpkg.cfg.d/docker-nodoc \
+    && echo "path-include=/usr/share/doc/*/copyright" >> /etc/dpkg/dpkg.cfg.d/docker-nodoc \
+    ### install apt packages \
+    && apt-get -qy update \
+    && apt-get install -qy ${APT_DEPENDENCIES} \
+    && update-ca-certificates \
+    ### install patchelf \
+    && cd /tmp \
+    && git clone https://github.com/brenoguim/patchelf.git \
+    && cd patchelf \
+    && ./bootstrap.sh \
+    && mkdir build \
+    && cd build \
+    && ../configure \
+    && make \
+    && make install \
+    ### setup python 3
+    && python3 -m ensurepip \
+    && python3 -m pip install --no-cache --upgrade pip \
+    && python3 -m pip install --no-cache ${PIP_DEPENDENCIES}
