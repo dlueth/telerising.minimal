@@ -50,6 +50,7 @@ jobs:
       - name: Build image
         run: |
           cd ./telerising
+          git fetch --all
           git checkout ${{ github.event.client_payload.tag }}
           cd -
           
