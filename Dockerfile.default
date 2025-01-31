@@ -1,7 +1,17 @@
-FROM python:3.9-slim-buster as base
+FROM debian:buster-slim AS base
 
-ENV APT_DEPENDENCIES="build-essential ccache libfuse-dev libffi-dev upx scons git dh-autoreconf zlib1g zlib1g-dev ca-certificates" \
-    PIP_DEPENDENCIES="wheel cffi nuitka ordered-set pipreqs==0.4.13" \
+ARG NUITKA_VERSION=2.6.1
+ARG PYTHON_VERSION=3.13.1
+ARG UPX_VERSION=4.2.4
+ARG TARGETPLATFORM
+ARG TARGETARCH
+ARG TARGETVARIANT
+ENV \
+    ### GCC:
+    ### APT_DEPENDENCIES="build-essential ccache libfuse-dev libffi-dev scons git dh-autoreconf zlib1g zlib1g-dev libncurses5-dev libgdbm-dev libnss3-dev libssl-dev libsqlite3-dev libreadline-dev libbz2-dev curl wget ca-certificates" \
+    ### CLANG:
+    APT_DEPENDENCIES="build-essential pkg-config apt-utils make lsb-release wget software-properties-common gnupg ccache libfuse-dev libffi-dev scons git dh-autoreconf zlib1g zlib1g-dev libncurses5-dev libgdbm-dev libnss3-dev libssl-dev libsqlite3-dev libreadline-dev libbz2-dev curl wget ca-certificates" \
+    PIP_DEPENDENCIES="wheel cffi nuitka==${NUITKA_VERSION} ordered-set pipreqs==0.4.13" \
     DEBIAN_FRONTEND="noninteractive" \
     TERM=xterm
 
@@ -19,6 +29,24 @@ RUN \
     && apt-get -qy update \
     && apt-get install -qy ${APT_DEPENDENCIES} \
     && update-ca-certificates \
+    ### install clang
+    # && bash -c "$(wget -O - https://apt.llvm.org/llvm.sh)" \
+    # && update-alternatives --install /usr/bin/cc cc /usr/bin/clang-18 100 \
+    # && update-alternatives --install /usr/bin/c++ c++ /usr/bin/clang++-18 100 \
+    # && export CMAKE_C_COMPILER=clang-18 \
+    # && export CMAKE_CXX_COMPILER=clang++-18 \
+    ### setup python 3
+    && cd / \
+    && wget -q https://www.python.org/ftp/python/${PYTHON_VERSION}/Python-${PYTHON_VERSION}.tgz \
+    && tar -xf Python-${PYTHON_VERSION}.tgz \
+    && cd Python-${PYTHON_VERSION} \
+    # && ./configure --enable-optimizations --with-ensurepip=install \
+    && ./configure \
+    && make && make install \
+    && python3 -m ensurepip \
+    && python3 -m pip install --no-cache --upgrade pip \
+    && python3 -m pip install --no-cache ${PIP_DEPENDENCIES} \
+    && rm -rf /Python-${PYTHON_VERSION} \
     ### install patchelf \
     && cd /tmp \
     && git clone https://github.com/brenoguim/patchelf.git \
@@ -29,7 +57,12 @@ RUN \
     && ../configure \
     && make \
     && make install \
-    ### setup python 3
-    && python3 -m ensurepip \
-    && python3 -m pip install --no-cache --upgrade pip \
-    && python3 -m pip install --no-cache ${PIP_DEPENDENCIES}
+    && rm -rf /patchelf \
+    ### install upx \
+    && cd / \
+    && wget -q https://github.com/upx/upx/releases/download/v${UPX_VERSION}/upx-${UPX_VERSION}-${TARGETARCH}_linux.tar.xz \
+    && tar -xvf upx-${UPX_VERSION}-${TARGETARCH}_linux.tar.xz \
+    && rm -rf ./upx-${UPX_VERSION}-${TARGETARCH}_linux.tar.xz \
+    && ln -s /upx-${UPX_VERSION}-${TARGETARCH}_linux/upx /usr/local/bin/upx \
+    ### cleanup \
+    && apt -qy autoclean && apt -qy clean && apt -qy autoremove --purge

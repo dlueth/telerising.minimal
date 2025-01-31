@@ -73,6 +73,7 @@ jobs:
           docker container cp telerising-arm64v8:/var/dist/ ${ROOT}binaries/arm64v8
           docker container cp telerising-arm32v7:/var/dist/ ${ROOT}binaries/arm32v7
           docker container cp telerising-arm32v6:/var/dist/ ${ROOT}binaries/arm32v6
+          rm -rf ${ROOT}binaries/**/settings.json
           tar -czvf ${ROOT}binaries/telerising.amd64.tar.gz -C ${ROOT}binaries/amd64 ${ROOT}
           tar -czvf ${ROOT}binaries/telerising.arm64v8.tar.gz -C ${ROOT}binaries/arm64v8 ${ROOT}
           tar -czvf ${ROOT}binaries/telerising.arm32v7.tar.gz -C ${ROOT}binaries/arm32v7 ${ROOT}
