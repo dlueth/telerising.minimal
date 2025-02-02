@@ -11,12 +11,7 @@ COPY telerising ${WORKDIR}/
 COPY root /
 
 RUN mv run.py telerising.py \
-    && pipreqs ./ \
-    && cat requirements.txt \
-    && python3 -m pip install --no-cache --upgrade -r requirements.txt \
-    && python3 -m pip install urllib3==1.26.12
-
-RUN python3 -OO -m nuitka \
+    && python3 -OO -m nuitka \
     --standalone \
     --follow-stdlib \
     --prefer-source-code \

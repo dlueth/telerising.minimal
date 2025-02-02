@@ -1,14 +1,19 @@
-FROM balenalib/raspberry-pi-debian:buster AS base
+# syntax=docker/dockerfile:1
 
-ARG NUITKA_VERSION=2.6.1
-ARG PYTHON_VERSION=3.13.1
+# FROM balenalib/raspberry-pi-debian:buster AS base
+FROM homeassistant/armhf-base-debian:buster AS base
+
+# ARG NUITKA_VERSION=2.6.1
+ARG NUITKA_VERSION=2.4.10
+# ARG PYTHON_VERSION=3.13.1
+ARG PYTHON_VERSION=3.11.2
 ARG UPX_VERSION=4.2.4
 ARG TARGETPLATFORM
 ARG TARGETARCH
 ARG TARGETVARIANT
 ENV \
-    APT_DEPENDENCIES="build-essential pkg-config apt-utils make lsb-release wget software-properties-common gnupg ccache libfuse-dev libffi-dev scons git dh-autoreconf zlib1g zlib1g-dev libncurses5-dev libgdbm-dev libnss3-dev libssl-dev libsqlite3-dev libreadline-dev libbz2-dev curl wget ca-certificates" \
-    PIP_DEPENDENCIES="wheel cffi nuitka==${NUITKA_VERSION} ordered-set pipreqs==0.4.13" \
+    APT_DEPENDENCIES="apt-utils build-essential ca-certificates ccache curl dh-autoreconf git gnupg libbz2-dev libffi-dev libfuse-dev libgdbm-dev libncurses5-dev libnss3-dev libreadline-dev libsqlite3-dev libssl-dev lsb-release pkg-config software-properties-common wget zlib1g zlib1g-dev" \
+    PIP_DEPENDENCIES="beautifulsoup4==4.12.3 cffi=1.17.1 Flask==3.1.0 httpx==0.28.1 nuitka==${NUITKA_VERSION} ordered-set=4.1.0 PyJWT==2.10.1 pytz==2025.1 Requests==2.32.3 scons==4.8.1 urllib3==1.26.12 wheel=0.45.1 xmltodict==0.14.2" \
     DEBIAN_FRONTEND="noninteractive" \
     TERM=xterm
 
@@ -24,6 +29,7 @@ RUN \
     && echo "path-include=/usr/share/doc/*/copyright" >> /etc/dpkg/dpkg.cfg.d/docker-nodoc \
     ### install apt packages \
     && apt-get -qy update \
+    && apt-get -qy dist-upgrade \
     && apt-get install -qy ${APT_DEPENDENCIES} \
     && update-ca-certificates \
     && cd / \
