@@ -13,7 +13,7 @@ ARG TARGETARCH
 ARG TARGETVARIANT
 ENV \
     APT_DEPENDENCIES="apt-utils build-essential ca-certificates ccache curl dh-autoreconf git gnupg libbz2-dev libffi-dev libfuse-dev libgdbm-dev libncurses5-dev libnss3-dev libreadline-dev libsqlite3-dev libssl-dev lsb-release pkg-config software-properties-common wget zlib1g zlib1g-dev" \
-    PIP_DEPENDENCIES="beautifulsoup4==4.12.3 cffi=1.17.1 Flask==3.1.0 httpx==0.28.1 nuitka==${NUITKA_VERSION} ordered-set=4.1.0 PyJWT==2.10.1 pytz==2025.1 Requests==2.32.3 scons==4.8.1 urllib3==1.26.12 wheel=0.45.1 xmltodict==0.14.2" \
+    PIP_DEPENDENCIES="beautifulsoup4==4.12.3 cffi==1.17.1 Flask==3.1.0 httpx==0.28.1 nuitka==${NUITKA_VERSION} ordered-set==4.1.0 PyJWT==2.10.1 pytz==2025.1 Requests==2.32.3 scons==4.8.1 urllib3==1.26.12 wheel==0.45.1 xmltodict==0.14.2" \
     DEBIAN_FRONTEND="noninteractive" \
     TERM=xterm
 
