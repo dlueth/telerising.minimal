@@ -1,7 +1,6 @@
 # syntax=docker/dockerfile:1
 
-# FROM balenalib/raspberry-pi-debian:buster AS base
-FROM homeassistant/armhf-base-debian:buster AS base
+FROM balenalib/raspberry-pi-debian:buster AS base
 
 # ARG NUITKA_VERSION=2.6.1
 ARG NUITKA_VERSION=2.4.10

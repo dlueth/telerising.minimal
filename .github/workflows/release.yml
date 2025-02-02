@@ -58,22 +58,31 @@ jobs:
           cd -
           
           echo "##### building multiarch images #####"
-          docker buildx build --progress=plain --platform linux/amd64,linux/arm64/v8,linux/arm/v7 --target dist --no-cache --force-rm --compress --push -t qoopido/telerising.minimal:${{ env.DOCKER_TAG_HASH }} -t qoopido/telerising.minimal:${{ env.DOCKER_TAG_VERSION }} -t qoopido/telerising.minimal:${{ env.DOCKER_TAG_LATEST }} -f Dockerfile.build .
+          docker buildx build --progress=plain --platform linux/amd64,linux/arm64/v8,linux/arm/v7,linux/arm/v6 --target dist --no-cache --force-rm --compress --push -t qoopido/telerising.minimal:${{ env.DOCKER_TAG_HASH }} -t qoopido/telerising.minimal:${{ env.DOCKER_TAG_VERSION }} -t qoopido/telerising.minimal:${{ env.DOCKER_TAG_LATEST }} -f Dockerfile.build .
           
           echo "##### creating container to copy binaries from #####"
-          docker create --name=telerising-amd64 --platform linux/amd64 qoopido/telerising.minimal:minimal
-          docker create --name=telerising-arm64v8 --platform linux/arm64/v8 qoopido/telerising.minimal:minimal
-          docker create --name=telerising-arm32v7 --platform linux/arm/v7 qoopido/telerising.minimal:minimal
+          docker create --name=telerising-amd64 --platform linux/amd64 qoopido/telerising.minimal:${{ env.DOCKER_TAG_LATEST }}
+          docker create --name=telerising-arm64v8 --platform linux/arm64/v8 qoopido/telerising.minimal:${{ env.DOCKER_TAG_LATEST }}
+          docker create --name=telerising-arm32v7 --platform linux/arm/v7 qoopido/telerising.minimal:${{ env.DOCKER_TAG_LATEST }}
+          docker create --name=telerising-arm32v6 --platform linux/arm/v6 qoopido/telerising.minimal:${{ env.DOCKER_TAG_LATEST }}
           
           echo "##### copying binaries from container #####"
-          docker container cp telerising-amd64:/telerising ${ROOT}binaries/amd64/telerising
-          docker container cp telerising-arm64v8:/telerising ${ROOT}binaries/arm64v8/telerising
-          docker container cp telerising-arm32v7:/telerising ${ROOT}binaries/arm32v7/telerising
+          docker container cp telerising-amd64:/ ${ROOT}binaries/amd64/
+          docker container cp telerising-arm64v8:/ ${ROOT}binaries/arm64v8/
+          docker container cp telerising-arm32v7:/ ${ROOT}binaries/arm32v7/
+          docker container cp telerising-arm32v6:/ ${ROOT}binaries/arm32v6/
+          
+          echo "##### cleaning up binary directories #####"
+          rm -rf ${ROOT}binaries/amd64/.dockerenv ${ROOT}binaries/amd64/bin ${ROOT}binaries/amd64/dev ${ROOT}binaries/amd64/proc ${ROOT}binaries/amd64/sys ${ROOT}binaries/amd64/etc/hostname ${ROOT}binaries/amd64/etc/hosts ${ROOT}binaries/amd64/etc/mtab ${ROOT}binaries/amd64/etc/resolv.conf
+          rm -rf ${ROOT}binaries/arm64v8/.dockerenv ${ROOT}binaries/arm64v8/bin ${ROOT}binaries/arm64v8/dev ${ROOT}binaries/arm64v8/proc ${ROOT}binaries/arm64v8/sys ${ROOT}binaries/arm64v8/etc/hostname ${ROOT}binaries/arm64v8/etc/hosts ${ROOT}binaries/arm64v8/etc/mtab ${ROOT}binaries/arm64v8/etc/resolv.conf
+          rm -rf ${ROOT}binaries/arm32v7/.dockerenv ${ROOT}binaries/arm32v7/bin ${ROOT}binaries/arm32v7/dev ${ROOT}binaries/arm32v7/proc ${ROOT}binaries/arm32v7/sys ${ROOT}binaries/arm32v7/etc/hostname ${ROOT}binaries/arm32v7/etc/hosts ${ROOT}binaries/arm32v7/etc/mtab ${ROOT}binaries/arm32v7/etc/resolv.conf
+          rm -rf ${ROOT}binaries/arm32v6/.dockerenv ${ROOT}binaries/arm32v6/bin ${ROOT}binaries/arm32v6/dev ${ROOT}binaries/arm32v6/proc ${ROOT}binaries/arm32v6/sys ${ROOT}binaries/arm32v6/etc/hostname ${ROOT}binaries/arm32v6/etc/hosts ${ROOT}binaries/arm32v6/etc/mtab ${ROOT}binaries/arm32v6/etc/resolv.conf
           
           echo "##### creating archives from binaries #####"
           tar -czvf ${ROOT}binaries/telerising.amd64.tar.gz -C ${ROOT}binaries/amd64 ${ROOT}
           tar -czvf ${ROOT}binaries/telerising.arm64v8.tar.gz -C ${ROOT}binaries/arm64v8 ${ROOT}
           tar -czvf ${ROOT}binaries/telerising.arm32v7.tar.gz -C ${ROOT}binaries/arm32v7 ${ROOT}
+          tar -czvf ${ROOT}binaries/telerising.arm32v6.tar.gz -C ${ROOT}binaries/arm32v6 ${ROOT}
           
           echo "##### preparing GitHub release #####"
           rm -rf ${ROOT}binaries/amd64 ${ROOT}binaries/arm64v8 ${ROOT}binaries/arm32v7
@@ -95,3 +104,4 @@ jobs:
             ./binaries/telerising.amd64.tar.gz
             ./binaries/telerising.arm64v8.tar.gz
             ./binaries/telerising.arm32v7.tar.gz
+            ./binaries/telerising.arm32v6.tar.gz
